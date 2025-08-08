@@ -7,20 +7,19 @@ import { Map } from 'react-kakao-maps-sdk';
 import { createClient } from '@supabase/supabase-js';
 import FloatingMemo from './components/FloatingMemo';
 import EventModal from './components/EventModal';
+import type { WalkEvent, KakaoMouseEvent } from './types/walk';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// 이벤트 타입 정의
-export type WalkEvent = {
-  id: string;
-  lat: number;
-  lng: number;
-  icon: '💩' | '🐾' | '🎉';
-  memo: string;
-};
+// kakao 전역 최소 선언 (any 없이)
+declare global {
+  interface Window {
+    kakao: { maps: { load: (cb: () => void) => void } };
+  }
+}
 
 export default function Home() {
   const [loaded, setLoaded] = useState(false);
@@ -64,10 +63,7 @@ export default function Home() {
   }, []);
 
   // 지도 클릭 시 새 이벤트 좌표 설정
-  const handleMapClick = (
-    _map: kakao.maps.Map,
-    mouseEvent: kakao.maps.event.MouseEvent
-  ) => {
+  const handleMapClick = (_map: unknown, mouseEvent: KakaoMouseEvent) => {
     const latlng = mouseEvent.latLng;
     setNewEvent({ lat: latlng.getLat(), lng: latlng.getLng() });
   };
@@ -117,6 +113,8 @@ export default function Home() {
     setNewEvent(null);
   };
 
+  const safeCenter = position ?? { lat: 37.5665, lng: 126.978 };
+
   return (
     <>
       <Script
@@ -148,7 +146,7 @@ export default function Home() {
           </div>
         ) : (
           <Map
-            center={position}
+            center={safeCenter}
             style={{ flex: 1 }}
             level={3}
             onClick={handleMapClick}

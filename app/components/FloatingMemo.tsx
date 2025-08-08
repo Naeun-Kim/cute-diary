@@ -2,14 +2,7 @@ import { useState } from 'react';
 import { CustomOverlayMap } from 'react-kakao-maps-sdk';
 import { motion } from 'framer-motion';
 import * as styles from './FloatingMemo.css';
-
-type WalkEvent = {
-  id: string;
-  lat: number;
-  lng: number;
-  icon: '💩' | '🐾' | '🍀' | '🐯' | '💕' | '😺' | '🐰' | '🦊' | '🐙' | '🦄';
-  memo: string;
-};
+import type { WalkEvent } from '../types/walk';
 
 interface FloatingMemoProps {
   event: WalkEvent;

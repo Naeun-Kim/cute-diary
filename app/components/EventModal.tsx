@@ -2,18 +2,7 @@
 
 import { useState } from 'react';
 import * as styles from './EventModal.css';
-
-type IconType =
-  | '💩'
-  | '🐾'
-  | '🍀'
-  | '🐯'
-  | '💕'
-  | '😺'
-  | '🐰'
-  | '🦊'
-  | '🐙'
-  | '🦄';
+import type { IconType } from '../types/walk';
 
 const icons: IconType[] = [
   '💩',
