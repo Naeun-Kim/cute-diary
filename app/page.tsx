@@ -1,103 +1,186 @@
-import Image from "next/image";
+// Home.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import Script from 'next/script';
+import { Map } from 'react-kakao-maps-sdk';
+import { createClient } from '@supabase/supabase-js';
+import FloatingMemo from './components/FloatingMemo';
+import EventModal from './components/EventModal';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// 이벤트 타입 정의
+export type WalkEvent = {
+  id: string;
+  lat: number;
+  lng: number;
+  icon: '💩' | '🐾' | '🎉';
+  memo: string;
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [loaded, setLoaded] = useState(false);
+  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+  const [geoReady, setGeoReady] = useState(false);
+  const [events, setEvents] = useState<WalkEvent[]>([]);
+  const [newEvent, setNewEvent] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+  const [editingEvent, setEditingEvent] = useState<WalkEvent | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data, error } = await supabase
+        .from<'walk_events', WalkEvent>('walk_events')
+        .select('*');
+      if (error) console.error('Error fetching events:', error);
+      else setEvents(data ?? []);
+    };
+    fetchEvents();
+  }, []);
+
+  // 현재 위치 가져오기
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setPosition(coords);
+        setGeoReady(true);
+      },
+      () => {
+        // 위치 가져오기 실패 시 기본값 설정
+        setPosition({ lat: 37.5665, lng: 126.978 });
+        setGeoReady(true);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
+  // 지도 클릭 시 새 이벤트 좌표 설정
+  const handleMapClick = (_: any, mouseEvent: any) => {
+    const latlng = mouseEvent.latLng;
+    setNewEvent({ lat: latlng.getLat(), lng: latlng.getLng() });
+  };
+
+  // 새 이벤트 저장
+  const handleAddEvent = async (icon: WalkEvent['icon'], memo: string) => {
+    if (!newEvent) return;
+    const newItem: WalkEvent = {
+      id: Date.now().toString(),
+      lat: newEvent.lat,
+      lng: newEvent.lng,
+      icon,
+      memo,
+    };
+    setEvents((prev) => [...prev, newItem]);
+    //supabase에 저장
+    const { error } = await supabase.from('walk_events').insert([newItem]);
+    if (error) console.error('Error inserting event:', error);
+    setNewEvent(null);
+  };
+
+  const handleEdit = (id: string) => {
+    setNewEvent(null);
+    const evt = events.find((e) => e.id === id);
+    if (evt) setEditingEvent(evt);
+  };
+
+  const handleUpdateEvent = async (icon: WalkEvent['icon'], memo: string) => {
+    if (!editingEvent) return;
+    setEvents((prev) =>
+      prev.map((e) => (e.id === editingEvent.id ? { ...e, icon, memo } : e))
+    );
+    const { error } = await supabase
+      .from('walk_events')
+      .update({ icon, memo })
+      .eq('id', editingEvent.id);
+    if (error) console.error('Error updating event:', error);
+    setEditingEvent(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    setEvents((prev) => prev.filter((e) => e.id !== id));
+    const { error } = await supabase.from('walk_events').delete().eq('id', id);
+    if (error) console.error('Error deleting event:', error);
+    setEditingEvent(null);
+    setNewEvent(null);
+  };
+
+  return (
+    <>
+      <Script
+        src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&autoload=false`}
+        onLoad={() => {
+          window.kakao.maps.load(() => setLoaded(true));
+        }}
+        onError={() => console.error('Failed to load Kakao Maps SDK')}
+      />
+
+      <div
+        style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}
+      >
+        {/* <header style={{ padding: 12, background: '#fff', zIndex: 1 }}>
+          <h1 style={{ margin: 0 }}>어디서 산책해?</h1>
+        </header> */}
+
+        {/* 지도 렌더링 */}
+        {!loaded || !geoReady ? (
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            위치와 지도를 불러오는 중...
+          </div>
+        ) : (
+          <Map
+            center={position}
+            style={{ flex: 1 }}
+            level={3}
+            onClick={handleMapClick}
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+            {events.map((event) => (
+              <FloatingMemo
+                key={event.id}
+                event={event}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onToggleMemo={() => setNewEvent(null)}
+              />
+            ))}
+          </Map>
+        )}
+
+        {/* 이벤트 모달 */}
+        {newEvent && !editingEvent && (
+          <EventModal
+            onClose={() => setNewEvent(null)}
+            onSubmit={handleAddEvent}
+            initialIcon="💩"
+            initialMemo=""
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+        )}
+
+        {editingEvent && (
+          <EventModal
+            initialIcon={editingEvent.icon}
+            initialMemo={editingEvent.memo}
+            onClose={() => setEditingEvent(null)}
+            onSubmit={handleUpdateEvent}
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        )}
+      </div>
+    </>
   );
 }
