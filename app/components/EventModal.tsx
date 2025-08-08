@@ -35,7 +35,7 @@ export default function EventModal({
   initialMemo,
 }: {
   onClose: () => void;
-  onSubmit: (icon: '💩' | '🐾' | '🎉', memo: string) => void;
+  onSubmit: (icon: IconType, memo: string) => void;
   initialIcon: IconType;
   initialMemo: string;
 }) {
