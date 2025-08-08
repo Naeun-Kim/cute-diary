@@ -64,7 +64,10 @@ export default function Home() {
   }, []);
 
   // 지도 클릭 시 새 이벤트 좌표 설정
-  const handleMapClick = (_: any, mouseEvent: any) => {
+  const handleMapClick = (
+    _map: kakao.maps.Map,
+    mouseEvent: kakao.maps.event.MouseEvent
+  ) => {
     const latlng = mouseEvent.latLng;
     setNewEvent({ lat: latlng.getLat(), lng: latlng.getLng() });
   };
