@@ -30,6 +30,7 @@ export default function FloatingMemo({
       <CustomOverlayMap
         position={{ lat: event.lat, lng: event.lng }}
         yAnchor={0.5}
+        clickable
       >
         <div onClick={handleIconClick} className={styles.iconStyle}>
           {event.icon}
@@ -47,14 +48,20 @@ export default function FloatingMemo({
           >
             <div className={styles.controlContainer}>
               <button
-                onClick={() => onEdit(event.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(event.id);
+                }}
                 className={styles.controlButton}
                 title="Edit"
               >
                 ✏️
               </button>
               <button
-                onClick={() => onDelete(event.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(event.id);
+                }}
                 className={styles.controlButton}
                 title="Delete"
               >

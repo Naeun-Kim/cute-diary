@@ -41,17 +41,19 @@ export default function EventModal({
     <div className={styles.modalOverlay}>
       <h3 className={styles.title}>이벤트 추가</h3>
       <div className={styles.iconContainer}>
-        {icons.map((icon) => (
-          <button
-            key={icon}
-            onClick={() => setSelectedIcon(icon)}
-            className={`${styles.iconButton} ${
-              selectedIcon === icon ? styles.iconButtonSelected : ''
-            }`}
-          >
-            {icon}
-          </button>
-        ))}
+        <div className={styles.iconInnerScroll}>
+          {icons.map((icon) => (
+            <button
+              key={icon}
+              onClick={() => setSelectedIcon(icon)}
+              className={`${styles.iconButton} ${
+                selectedIcon === icon ? styles.iconButtonSelected : ''
+              }`}
+            >
+              {icon}
+            </button>
+          ))}
+        </div>
       </div>
       <textarea
         rows={3}

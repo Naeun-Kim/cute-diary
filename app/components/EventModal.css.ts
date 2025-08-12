@@ -22,11 +22,20 @@ export const title = style({
 
 export const iconContainer = style({
   display: 'flex',
-  gap: 12,
   marginTop: 8,
+  marginLeft: -16,
+  marginRight: -16,
+});
+
+export const iconInnerScroll = style({
+  display: 'flex',
+  gap: 12,
+  overflowX: 'auto',
+  paddingInline: 16,
 });
 
 export const iconButton = style({
+  flexShrink: 0,
   fontSize: 24,
   width: 55,
   padding: 8,
