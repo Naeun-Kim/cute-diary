@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { createClient, type User } from '@supabase/supabase-js';
-import { sup } from 'framer-motion/client';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
