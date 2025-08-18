@@ -17,6 +17,8 @@ export type WalkEvent = {
   lng: number;
   icon: IconType;
   memo: string;
+  user_id: string;
+  created_at?: string;
 };
 
 // Kakao click event에 필요한 최소 타입

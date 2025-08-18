@@ -4,9 +4,14 @@
 import { useState, useEffect } from 'react';
 import Script from 'next/script';
 import { Map } from 'react-kakao-maps-sdk';
-import { createClient } from '@supabase/supabase-js';
+import {
+  createClient,
+  type User,
+  PostgrestSingleResponse,
+} from '@supabase/supabase-js';
 import FloatingMemo from './components/FloatingMemo';
 import EventModal from './components/EventModal';
+import AuthBar from './components/AuthBar';
 import type { WalkEvent, KakaoMouseEvent } from './types/walk';
 
 const supabase = createClient(
@@ -22,6 +27,7 @@ declare global {
 }
 
 export default function Home() {
+  const [user, setUser] = useState<User | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(
     null
@@ -33,16 +39,32 @@ export default function Home() {
   );
   const [editingEvent, setEditingEvent] = useState<WalkEvent | null>(null);
 
+  //로그인 상태 구독
   useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setEvents([]);
+      return;
+    }
     const fetchEvents = async () => {
-      const { data, error } = await supabase
-        .from<'walk_events', WalkEvent>('walk_events')
-        .select('*');
+      const { data, error } = (await supabase
+        .from('walk_events')
+        .select('*')
+        .eq('user_id', user.id)) as PostgrestSingleResponse<WalkEvent[]>;
       if (error) console.error('Error fetching events:', error);
       else setEvents(data ?? []);
     };
     fetchEvents();
-  }, []);
+  }, [user]);
 
   // 현재 위치 가져오기
   useEffect(() => {
@@ -64,19 +86,24 @@ export default function Home() {
 
   // 지도 클릭 시 새 이벤트 좌표 설정
   const handleMapClick = (_map: unknown, mouseEvent: KakaoMouseEvent) => {
+    if (!user) {
+      alert('로그인 후에 메모를 추가할 수 있어요 🙂');
+      return;
+    }
     const latlng = mouseEvent.latLng;
     setNewEvent({ lat: latlng.getLat(), lng: latlng.getLng() });
   };
 
   // 새 이벤트 저장
   const handleAddEvent = async (icon: WalkEvent['icon'], memo: string) => {
-    if (!newEvent) return;
+    if (!newEvent || !user) return;
     const newItem: WalkEvent = {
       id: Date.now().toString(),
       lat: newEvent.lat,
       lng: newEvent.lng,
       icon,
       memo,
+      user_id: user.id,
     };
     setEvents((prev) => [...prev, newItem]);
     //supabase에 저장
@@ -92,22 +119,28 @@ export default function Home() {
   };
 
   const handleUpdateEvent = async (icon: WalkEvent['icon'], memo: string) => {
-    if (!editingEvent) return;
+    if (!editingEvent || !user) return;
     setEvents((prev) =>
       prev.map((e) => (e.id === editingEvent.id ? { ...e, icon, memo } : e))
     );
     const { error } = await supabase
       .from('walk_events')
       .update({ icon, memo })
-      .eq('id', editingEvent.id);
+      .eq('id', editingEvent.id)
+      .eq('user_id', user.id);
     if (error) console.error('Error updating event:', error);
     setEditingEvent(null);
   };
 
   const handleDelete = async (id: string) => {
+    if (!user) return;
     if (!confirm('정말 삭제하시겠습니까?')) return;
     setEvents((prev) => prev.filter((e) => e.id !== id));
-    const { error } = await supabase.from('walk_events').delete().eq('id', id);
+    const { error } = await supabase
+      .from('walk_events')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
     if (error) console.error('Error deleting event:', error);
     setEditingEvent(null);
     setNewEvent(null);
@@ -131,6 +164,10 @@ export default function Home() {
         {/* <header style={{ padding: 12, background: '#fff', zIndex: 1 }}>
           <h1 style={{ margin: 0 }}>어디서 산책해?</h1>
         </header> */}
+
+        <div style={{ background: '#fff', borderBottom: '1px solid #eee' }}>
+          <AuthBar />
+        </div>
 
         {/* 지도 렌더링 */}
         {!loaded || !geoReady ? (
