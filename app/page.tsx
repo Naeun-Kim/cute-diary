@@ -58,8 +58,7 @@ export default function Home() {
     const fetchEvents = async () => {
       const { data, error } = (await supabase
         .from('walk_events')
-        .select('*')
-        .eq('user_id', user.id)) as PostgrestSingleResponse<WalkEvent[]>;
+        .select('*')) as PostgrestSingleResponse<WalkEvent[]>;
       if (error) console.error('Error fetching events:', error);
       else setEvents(data ?? []);
     };
@@ -192,6 +191,7 @@ export default function Home() {
               <FloatingMemo
                 key={event.id}
                 event={event}
+                isOwner={user?.id === event.user_id}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onToggleMemo={() => setNewEvent(null)}

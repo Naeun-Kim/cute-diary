@@ -6,6 +6,7 @@ import type { WalkEvent } from '../types/walk';
 
 interface FloatingMemoProps {
   event: WalkEvent;
+  isOwner: boolean;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleMemo: () => void;
@@ -13,6 +14,7 @@ interface FloatingMemoProps {
 
 export default function FloatingMemo({
   event,
+  isOwner,
   onEdit,
   onDelete,
   onToggleMemo,
@@ -28,6 +30,7 @@ export default function FloatingMemo({
 
   const handleMemoClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
+    if (!isOwner) return;
     onToggleMemo(); // 혹시 열려 있을 수 있는 새 이벤트 모달 닫기
     onEdit(event.id); // 부모에서 editingEvent 설정 → EventModal 오픈
     setShowMemo(false); // 메모 오버레이는 닫아두기(선택)
@@ -57,26 +60,30 @@ export default function FloatingMemo({
             transition={{ duration: 2, repeat: Infinity }}
           >
             <div className={styles.controlContainer}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(event.id);
-                }}
-                className={styles.controlButton}
-                title="Edit"
-              >
-                ✏️
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(event.id);
-                }}
-                className={styles.controlButton}
-                title="Delete"
-              >
-                🗑️
-              </button>
+              {isOwner && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(event.id);
+                    }}
+                    className={styles.controlButton}
+                    title="Edit"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(event.id);
+                    }}
+                    className={styles.controlButton}
+                    title="Delete"
+                  >
+                    🗑️
+                  </button>
+                </>
+              )}
             </div>
             <div className={styles.iconLarge}>{event.icon}</div>
             <p>{event.memo}</p>
