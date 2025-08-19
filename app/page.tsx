@@ -165,7 +165,7 @@ export default function Home() {
           <h1 style={{ margin: 0 }}>어디서 산책해?</h1>
         </header> */}
 
-        <div style={{ background: '#fff', borderBottom: '1px solid #eee' }}>
+        <div>
           <AuthBar />
         </div>
 

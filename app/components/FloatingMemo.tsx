@@ -19,10 +19,18 @@ export default function FloatingMemo({
 }: FloatingMemoProps) {
   const [showMemo, setShowMemo] = useState(false);
 
-  const handleIconClick = () => {
+  const handleIconClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     // 메모 토글 시, 부모 상태(newEvent) 초기화
     onToggleMemo();
     setShowMemo((prev) => !prev);
+  };
+
+  const handleMemoClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    onToggleMemo(); // 혹시 열려 있을 수 있는 새 이벤트 모달 닫기
+    onEdit(event.id); // 부모에서 editingEvent 설정 → EventModal 오픈
+    setShowMemo(false); // 메모 오버레이는 닫아두기(선택)
   };
 
   return (
@@ -40,9 +48,11 @@ export default function FloatingMemo({
         <CustomOverlayMap
           position={{ lat: event.lat, lng: event.lng }}
           yAnchor={1}
+          clickable
         >
           <motion.div
             className={styles.memoContainer}
+            onClick={handleMemoClick}
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
           >

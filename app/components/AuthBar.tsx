@@ -30,7 +30,15 @@ export default function AuthBar() {
   };
 
   return (
-    <div style={{ padding: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+    <div
+      style={{
+        padding: 8,
+        display: 'flex',
+        gap: 8,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
       {user ? (
         <>
           <span style={{ fontSize: 14 }}>Hi, {user.email}</span>
