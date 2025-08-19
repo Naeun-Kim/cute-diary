@@ -51,10 +51,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!user) {
-      setEvents([]);
-      return;
-    }
     const fetchEvents = async () => {
       const { data, error } = (await supabase
         .from('walk_events')
