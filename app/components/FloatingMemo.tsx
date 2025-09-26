@@ -105,7 +105,7 @@ export default function FloatingMemo({
         <>
           <div className={styles.controlContainer}>
             {isEventOwner(firstEvent) && (
-              <>
+              <div style={{ position: 'relative', paddingBlock: '4px' }}>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -126,7 +126,7 @@ export default function FloatingMemo({
                 >
                   🗑️
                 </button>
-              </>
+              </div>
             )}
           </div>
           <div className={styles.addButtonContainer}>
