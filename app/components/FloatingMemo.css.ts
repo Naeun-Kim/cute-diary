@@ -26,7 +26,7 @@ export const memoContainer = style({
 export const controlContainer = style({
   position: 'absolute',
   top: 4,
-  right: 4,
+  right: '40px', // 닫기 버튼을 위한 공간 확보
   display: 'flex',
   gap: '4px',
 });
@@ -76,6 +76,9 @@ export const eventCount = style({
 
 // Swiper 컨테이너
 export const swiperContainer = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '5px',
   width: '100%',
   height: '100%',
 });
@@ -84,7 +87,7 @@ export const swiperContainer = style({
 export const swiperPagination = style({});
 
 globalStyle(`${swiperPagination} .swiper-pagination`, {
-  bottom: '0 !important',
+  position: 'static',
 });
 
 globalStyle(`${swiperPagination} .swiper-pagination-bullet-active`, {
@@ -127,6 +130,14 @@ export const addButtonContainer = style({
   zIndex: 10,
 });
 
+// 닫기 버튼 컨테이너
+export const closeButtonContainer = style({
+  position: 'absolute',
+  top: '8px',
+  right: '8px', // 가장 우측으로 이동
+  zIndex: 10,
+});
+
 // + 버튼 스타일
 export const addButton = style({
   background: '#4ade80',
@@ -151,6 +162,19 @@ export const addButton = style({
   ':active': {
     transform: 'scale(0.95)',
   },
+});
+
+// 닫기 버튼 스타일
+export const closeButton = style({
+  background: 'none',
+  color: '#111',
+  width: '28px',
+  height: '28px',
+  fontSize: '28px',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 });
 
 // 메모 텍스트 스타일

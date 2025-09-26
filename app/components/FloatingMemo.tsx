@@ -165,7 +165,7 @@ export default function FloatingMemo({
       </CustomOverlayMap>
       {showMemo && (
         <CustomOverlayMap
-          position={{ lat: firstEvent.lat, lng: firstEvent.lng }}
+          position={{ lat: firstEvent.lat + 0.00015, lng: firstEvent.lng }}
           yAnchor={1}
           clickable
         >
@@ -182,6 +182,18 @@ export default function FloatingMemo({
                 title="나도 남기기"
               >
                 +
+              </button>
+            </div>
+            <div className={styles.closeButtonContainer}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMemo(false);
+                }}
+                className={styles.closeButton}
+                title="닫기"
+              >
+                ×
               </button>
             </div>
             {renderMemoContent()}

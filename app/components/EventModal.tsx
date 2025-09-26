@@ -58,10 +58,12 @@ export default function EventModal({
       <textarea
         rows={3}
         className={styles.textarea}
-        placeholder="메모를 입력하세요"
+        placeholder="메모를 입력하세요 (최대 200자)"
         value={memo}
         onChange={(e) => setMemo(e.target.value)}
+        maxLength={200}
       />
+      <div className={styles.charCount}>{memo.length}/200</div>
       <div className={styles.buttonContainer}>
         <button className={styles.button} onClick={onClose}>
           취소

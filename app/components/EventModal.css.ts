@@ -104,3 +104,11 @@ export const primaryButton = style([
     },
   },
 ]);
+
+// 글자 수 표시
+export const charCount = style({
+  fontSize: '12px',
+  color: '#666',
+  textAlign: 'right',
+  marginTop: '4px',
+});
