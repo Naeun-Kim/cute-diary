@@ -105,14 +105,7 @@ export default function FloatingMemo({
         <>
           <div className={styles.controlContainer}>
             {isEventOwner(firstEvent) && (
-              <div
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  gap: '8px',
-                  paddingBlock: '8px',
-                }}
-              >
+              <div className={styles.controlButtonWrapper}>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

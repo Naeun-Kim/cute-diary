@@ -1,14 +1,11 @@
-// FloatingMemo.css.ts
 import { style, globalStyle } from '@vanilla-extract/css';
 
-// 아이콘 스타일
 export const iconStyle = style({
   fontSize: '32px',
   cursor: 'pointer',
   userSelect: 'none',
 });
 
-// 메모 컨테이너 스타일
 export const memoContainer = style({
   position: 'relative',
   zIndex: 1,
@@ -23,16 +20,14 @@ export const memoContainer = style({
   whiteSpace: 'normal',
 });
 
-// 컨트롤 버튼 래퍼
 export const controlContainer = style({
   position: 'absolute',
   top: 4,
-  right: '36px', // 닫기 버튼을 위한 공간 확보
+  right: '36px',
   display: 'flex',
   gap: '8px',
 });
 
-// 편집/삭제 버튼 스타일
 export const controlButton = style({
   background: 'none',
   border: 'none',
@@ -41,24 +36,27 @@ export const controlButton = style({
   cursor: 'pointer',
 });
 
-// 메모 아이콘 크기
+export const controlButtonWrapper = style({
+  position: 'relative',
+  display: 'flex',
+  gap: '8px',
+  paddingBlock: '8px',
+});
+
 export const iconLarge = style({
   marginTop: '4px',
   fontSize: '20px',
 });
 
-// 여러 이벤트 아이콘 컨테이너
 export const multipleIconContainer = style({
   position: 'relative',
   display: 'inline-block',
 });
 
-// 여러 이벤트 아이콘
 export const multipleIcon = style({
   fontSize: '32px',
 });
 
-// 이벤트 개수 표시
 export const eventCount = style({
   position: 'absolute',
   top: '-8px',
@@ -75,7 +73,6 @@ export const eventCount = style({
   fontWeight: 'bold',
 });
 
-// Swiper 컨테이너
 export const swiperContainer = style({
   display: 'flex',
   flexDirection: 'column',
@@ -84,7 +81,6 @@ export const swiperContainer = style({
   height: '100%',
 });
 
-// Swiper 페이지네이션 스타일
 export const swiperPagination = style({});
 
 globalStyle(`${swiperPagination} .swiper-pagination`, {
@@ -95,7 +91,6 @@ globalStyle(`${swiperPagination} .swiper-pagination-bullet-active`, {
   backgroundColor: '#111 !important',
 });
 
-// 메모 슬라이드
 export const memoSlide = style({
   position: 'relative',
   gap: '4px',
@@ -111,7 +106,6 @@ export const memoSlide = style({
   flexDirection: 'column',
 });
 
-// 슬라이드 인디케이터
 export const slideIndicator = style({
   position: 'absolute',
   bottom: '4px',
@@ -123,7 +117,6 @@ export const slideIndicator = style({
   fontSize: '10px',
 });
 
-// + 버튼 컨테이너
 export const addButtonContainer = style({
   position: 'absolute',
   top: '8px',
@@ -131,15 +124,13 @@ export const addButtonContainer = style({
   zIndex: 10,
 });
 
-// 닫기 버튼 컨테이너
 export const closeButtonContainer = style({
   position: 'absolute',
   top: '8px',
-  right: '8px', // 가장 우측으로 이동
+  right: '8px',
   zIndex: 10,
 });
 
-// + 버튼 스타일
 export const addButton = style({
   background: '#4ade80',
   color: 'white',
@@ -165,7 +156,6 @@ export const addButton = style({
   },
 });
 
-// 닫기 버튼 스타일
 export const closeButton = style({
   background: 'none',
   color: '#111',
@@ -178,7 +168,6 @@ export const closeButton = style({
   justifyContent: 'center',
 });
 
-// 메모 텍스트 스타일
 export const memoText = style({
   paddingInline: '12px',
   selectors: {
