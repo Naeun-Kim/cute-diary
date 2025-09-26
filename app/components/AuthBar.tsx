@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient, type User } from '@supabase/supabase-js';
+import * as styles from './AuthBar.css';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,23 +31,15 @@ export default function AuthBar() {
   };
 
   return (
-    <div
-      style={{
-        padding: 8,
-        display: 'flex',
-        gap: 8,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
-    >
+    <header className={styles.authBarContainer}>
       {user ? (
         <>
-          <span style={{ fontSize: 14 }}>Hi, {user.email}</span>
+          <span className={styles.userEmail}>Hi, {user.email}</span>
           <button onClick={signOut}>Logout</button>
         </>
       ) : (
-        <button onClick={signIn}>Continue with Google</button>
+        <button onClick={signIn}>Google로 로그인하기</button>
       )}
-    </div>
+    </header>
   );
 }

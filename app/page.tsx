@@ -198,13 +198,7 @@ export default function Home() {
       <div
         style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}
       >
-        {/* <header style={{ padding: 12, background: '#fff', zIndex: 1 }}>
-          <h1 style={{ margin: 0 }}>어디서 산책해?</h1>
-        </header> */}
-
-        <div>
-          <AuthBar />
-        </div>
+        <AuthBar />
 
         {/* 지도 렌더링 */}
         {!loaded || !geoReady ? (
