@@ -11,6 +11,7 @@ export const iconStyle = style({
 // 메모 컨테이너 스타일
 export const memoContainer = style({
   position: 'relative',
+  zIndex: 1,
   background: 'rgba(255,255,255,.9)',
   borderRadius: '12px',
   paddingBlock: '8px',
@@ -26,9 +27,9 @@ export const memoContainer = style({
 export const controlContainer = style({
   position: 'absolute',
   top: 4,
-  right: '40px', // 닫기 버튼을 위한 공간 확보
+  right: '36px', // 닫기 버튼을 위한 공간 확보
   display: 'flex',
-  gap: '4px',
+  gap: '8px',
 });
 
 // 편집/삭제 버튼 스타일
