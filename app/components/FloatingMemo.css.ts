@@ -122,8 +122,8 @@ export const slideIndicator = style({
 // + 버튼 컨테이너
 export const addButtonContainer = style({
   position: 'absolute',
-  top: '4px',
-  left: '4px',
+  top: '8px',
+  left: '8px',
   zIndex: 10,
 });
 

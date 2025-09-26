@@ -93,15 +93,6 @@ export default function FloatingMemo({
                     </>
                   )}
                 </div>
-                <div className={styles.addButtonContainer}>
-                  <button
-                    onClick={handleAddNewMemo}
-                    className={styles.addButton}
-                    title="나도 남기기"
-                  >
-                    +
-                  </button>
-                </div>
                 <div className={styles.iconLarge}>{event.icon}</div>
                 <p className={styles.memoText}>{event.memo}</p>
               </div>
@@ -184,6 +175,15 @@ export default function FloatingMemo({
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
+            <div className={styles.addButtonContainer}>
+              <button
+                onClick={handleAddNewMemo}
+                className={styles.addButton}
+                title="나도 남기기"
+              >
+                +
+              </button>
+            </div>
             {renderMemoContent()}
           </motion.div>
         </CustomOverlayMap>
