@@ -14,6 +14,23 @@ import EventModal from './components/EventModal';
 import AuthBar from './components/AuthBar';
 import type { WalkEvent, KakaoMouseEvent } from './types/walk';
 
+// 같은 위치에 있는 이벤트들을 그룹핑하는 함수
+const groupEventsByLocation = (events: WalkEvent[]): WalkEvent[][] => {
+  const groups: Record<string, WalkEvent[]> = {};
+
+  events.forEach((event) => {
+    // 위치를 문자열로 변환하여 그룹핑 키로 사용 (소수점 6자리까지)
+    const locationKey = `${event.lat.toFixed(6)},${event.lng.toFixed(6)}`;
+
+    if (!groups[locationKey]) {
+      groups[locationKey] = [];
+    }
+    groups[locationKey].push(event);
+  });
+
+  return Object.values(groups);
+};
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -141,6 +158,14 @@ export default function Home() {
     setNewEvent(null);
   };
 
+  const handleAddNewMemo = (lat: number, lng: number) => {
+    if (!user) {
+      alert('로그인 후에 메모를 추가할 수 있어요 🙂');
+      return;
+    }
+    setNewEvent({ lat, lng });
+  };
+
   const safeCenter = position ?? { lat: 37.5665, lng: 126.978 };
 
   return (
@@ -183,16 +208,22 @@ export default function Home() {
             level={3}
             onClick={handleMapClick}
           >
-            {events.map((event) => (
-              <FloatingMemo
-                key={event.id}
-                event={event}
-                isOwner={user?.id === event.user_id}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onToggleMemo={() => setNewEvent(null)}
-              />
-            ))}
+            {groupEventsByLocation(events).map(
+              (eventGroup: WalkEvent[], groupIndex: number) => (
+                <FloatingMemo
+                  key={`group-${groupIndex}`}
+                  events={eventGroup}
+                  isOwner={eventGroup.some(
+                    (event: WalkEvent) => user?.id === event.user_id
+                  )}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onToggleMemo={() => setNewEvent(null)}
+                  currentUserId={user?.id}
+                  onAddNewMemo={handleAddNewMemo}
+                />
+              )
+            )}
           </Map>
         )}
 
