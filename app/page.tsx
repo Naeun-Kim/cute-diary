@@ -163,6 +163,23 @@ export default function Home() {
       alert('로그인 후에 메모를 추가할 수 있어요 🙂');
       return;
     }
+
+    // 같은 위치에 이미 해당 사용자의 메모가 있는지 확인
+    const locationKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+    const existingMemo = events.find((event) => {
+      const eventLocationKey = `${event.lat.toFixed(6)},${event.lng.toFixed(
+        6
+      )}`;
+      return eventLocationKey === locationKey && event.user_id === user.id;
+    });
+
+    if (existingMemo) {
+      alert(
+        '이미 이 장소에 메모를 남기셨어요! 한 장소당 하나의 메모만 남길 수 있습니다.'
+      );
+      return;
+    }
+
     setNewEvent({ lat, lng });
   };
 
