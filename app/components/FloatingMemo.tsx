@@ -2,16 +2,14 @@ import { useState } from 'react';
 import { CustomOverlayMap } from 'react-kakao-maps-sdk';
 import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Pagination } from 'swiper/modules';
 import 'swiper/css';
-import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import * as styles from './FloatingMemo.css';
 import type { WalkEvent } from '../types/walk';
 
 interface FloatingMemoProps {
   events: WalkEvent[];
-  isOwner: boolean;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleMemo: () => void;
@@ -21,7 +19,6 @@ interface FloatingMemoProps {
 
 export default function FloatingMemo({
   events,
-  isOwner,
   onEdit,
   onDelete,
   onToggleMemo,
@@ -45,10 +42,7 @@ export default function FloatingMemo({
 
   const handleMemoClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    if (!isOwner) return;
-    onToggleMemo(); // 혹시 열려 있을 수 있는 새 이벤트 모달 닫기
-    onEdit(firstEvent.id); // 부모에서 editingEvent 설정 → EventModal 오픈
-    setShowMemo(false); // 메모 오버레이는 닫아두기(선택)
+    // 메모 클릭 시 편집모드 진입 기능 제거
   };
 
   const handleAddNewMemo = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -63,14 +57,14 @@ export default function FloatingMemo({
     if (hasMultipleEvents) {
       return (
         <Swiper
-          modules={[Navigation, Pagination]}
+          modules={[Pagination]}
           spaceBetween={10}
           slidesPerView={1}
-          navigation={true}
+          navigation={false}
           pagination={{ clickable: true }}
-          className={styles.swiperContainer}
+          className={`${styles.swiperContainer} ${styles.swiperPagination}`}
         >
-          {events.map((event, index) => (
+          {events.map((event) => (
             <SwiperSlide key={event.id}>
               <div className={styles.memoSlide}>
                 <div className={styles.controlContainer}>
@@ -109,12 +103,7 @@ export default function FloatingMemo({
                   </button>
                 </div>
                 <div className={styles.iconLarge}>{event.icon}</div>
-                <p>{event.memo}</p>
-                {hasMultipleEvents && (
-                  <div className={styles.slideIndicator}>
-                    {index + 1} / {events.length}
-                  </div>
-                )}
+                <p className={styles.memoText}>{event.memo}</p>
               </div>
             </SwiperSlide>
           ))}
@@ -159,7 +148,7 @@ export default function FloatingMemo({
             </button>
           </div>
           <div className={styles.iconLarge}>{firstEvent.icon}</div>
-          <p>{firstEvent.memo}</p>
+          <p className={styles.memoText}>{firstEvent.memo}</p>
         </>
       );
     }

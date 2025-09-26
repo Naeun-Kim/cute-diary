@@ -1,5 +1,5 @@
 // FloatingMemo.css.ts
-import { style } from '@vanilla-extract/css';
+import { style, globalStyle } from '@vanilla-extract/css';
 
 // 아이콘 스타일
 export const iconStyle = style({
@@ -13,7 +13,7 @@ export const memoContainer = style({
   position: 'relative',
   background: 'rgba(255,255,255,.9)',
   borderRadius: '12px',
-  padding: '8px 12px',
+  paddingBlock: '8px',
   boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
   fontSize: '14px',
   color: '#222',
@@ -42,6 +42,7 @@ export const controlButton = style({
 
 // 메모 아이콘 크기
 export const iconLarge = style({
+  marginTop: '4px',
   fontSize: '20px',
 });
 
@@ -79,22 +80,31 @@ export const swiperContainer = style({
   height: '100%',
 });
 
+// Swiper 페이지네이션 스타일
+export const swiperPagination = style({});
+
+globalStyle(`${swiperPagination} .swiper-pagination`, {
+  bottom: '0 !important',
+});
+
+globalStyle(`${swiperPagination} .swiper-pagination-bullet-active`, {
+  backgroundColor: '#111 !important',
+});
+
 // 메모 슬라이드
 export const memoSlide = style({
   position: 'relative',
-  background: 'rgba(255,255,255,.9)',
-  borderRadius: '12px',
-  padding: '8px 12px',
-  boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+  gap: '4px',
+  paddingInline: '12px',
   fontSize: '14px',
   color: '#222',
   textAlign: 'center',
-  width: '200px',
+  width: '100%',
   whiteSpace: 'normal',
   height: '100%',
+  minHeight: '120px',
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'center',
 });
 
 // 슬라이드 인디케이터
@@ -140,5 +150,15 @@ export const addButton = style({
   },
   ':active': {
     transform: 'scale(0.95)',
+  },
+});
+
+// 메모 텍스트 스타일
+export const memoText = style({
+  paddingInline: '12px',
+  selectors: {
+    [`${memoContainer} > &`]: {
+      paddingBottom: '8px',
+    },
   },
 });

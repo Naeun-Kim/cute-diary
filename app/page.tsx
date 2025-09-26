@@ -213,9 +213,6 @@ export default function Home() {
                 <FloatingMemo
                   key={`group-${groupIndex}`}
                   events={eventGroup}
-                  isOwner={eventGroup.some(
-                    (event: WalkEvent) => user?.id === event.user_id
-                  )}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onToggleMemo={() => setNewEvent(null)}
