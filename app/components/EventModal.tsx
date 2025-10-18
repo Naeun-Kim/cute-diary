@@ -35,7 +35,6 @@ export default function EventModal({
   const handleSubmit = () => {
     const res = checkProfanity(memo);
 
-    // 자음/모음만, 비속어(strict/soft) 모두 저장 불가
     if (res.level === 'strict' || res.level === 'soft') {
       alert('자음/모음만 입력 또는 부적절한 표현이 포함되어 저장할 수 없어요.');
       return;
