@@ -48,13 +48,15 @@ export function isOnlyConsonantsOrVowels(input: string): boolean {
 
   // 모든 문자가 자음이거나 모음인지 확인
   const onlyConsonants = jamo.every((ch) => {
-    const isConsonant = /[ㄱ-ㅎ]/.test(ch);
-    console.log(`자음 체크: '${ch}' -> ${isConsonant}`);
+    const code = ch.charCodeAt(0);
+    const isConsonant = code >= 0x3131 && code <= 0x314e; // ㄱ-ㅎ 유니코드 범위
+    console.log(`자음 체크: '${ch}' (${code.toString(16)}) -> ${isConsonant}`);
     return isConsonant;
   });
   const onlyVowels = jamo.every((ch) => {
-    const isVowel = /[ㅏ-ㅣ]/.test(ch);
-    console.log(`모음 체크: '${ch}' -> ${isVowel}`);
+    const code = ch.charCodeAt(0);
+    const isVowel = code >= 0x314f && code <= 0x3163; // ㅏ-ㅣ 유니코드 범위
+    console.log(`모음 체크: '${ch}' (${code.toString(16)}) -> ${isVowel}`);
     return isVowel;
   });
 
@@ -66,6 +68,7 @@ export function isOnlyConsonantsOrVowels(input: string): boolean {
 }
 
 // 자음/모음만으로 이루어진 부분이 있는지 확인 (혼합 텍스트용)
+
 export function hasOnlyConsonantsOrVowels(input: string): boolean {
   const n = normalizeKo(input);
   const jamo = Hangul.disassemble(n).filter((ch) => ch !== ' ');
@@ -77,18 +80,23 @@ export function hasOnlyConsonantsOrVowels(input: string): boolean {
   let currentGroup = '';
   for (let i = 0; i < jamo.length; i++) {
     const ch = jamo[i];
-    if (/[ㄱ-ㅎㅏ-ㅣ]/.test(ch)) {
+    const code = ch.charCodeAt(0);
+    const isJamo =
+      (code >= 0x3131 && code <= 0x314e) || (code >= 0x314f && code <= 0x3163);
+    if (isJamo) {
       currentGroup += ch;
     } else {
       // 완성형 한글을 만나면 현재 그룹 검사
       if (currentGroup.length >= 3) {
         console.log('현재 그룹 검사:', currentGroup);
-        const onlyConsonants = currentGroup
-          .split('')
-          .every((c) => /[ㄱ-ㅎ]/.test(c));
-        const onlyVowels = currentGroup
-          .split('')
-          .every((c) => /[ㅏ-ㅣ]/.test(c));
+        const onlyConsonants = currentGroup.split('').every((c) => {
+          const code = c.charCodeAt(0);
+          return code >= 0x3131 && code <= 0x314e;
+        });
+        const onlyVowels = currentGroup.split('').every((c) => {
+          const code = c.charCodeAt(0);
+          return code >= 0x314f && code <= 0x3163;
+        });
         console.log('자음만:', onlyConsonants, '모음만:', onlyVowels);
         if (onlyConsonants || onlyVowels) {
           console.log('자음/모음만 그룹 발견!');
@@ -102,10 +110,14 @@ export function hasOnlyConsonantsOrVowels(input: string): boolean {
   // 마지막 그룹 검사
   if (currentGroup.length >= 3) {
     console.log('마지막 그룹 검사:', currentGroup);
-    const onlyConsonants = currentGroup
-      .split('')
-      .every((c) => /[ㄱ-ㅎ]/.test(c));
-    const onlyVowels = currentGroup.split('').every((c) => /[ㅏ-ㅣ]/.test(c));
+    const onlyConsonants = currentGroup.split('').every((c) => {
+      const code = c.charCodeAt(0);
+      return code >= 0x3131 && code <= 0x314e;
+    });
+    const onlyVowels = currentGroup.split('').every((c) => {
+      const code = c.charCodeAt(0);
+      return code >= 0x314f && code <= 0x3163;
+    });
     console.log('자음만:', onlyConsonants, '모음만:', onlyVowels);
     if (onlyConsonants || onlyVowels) {
       console.log('자음/모음만 그룹 발견!');
