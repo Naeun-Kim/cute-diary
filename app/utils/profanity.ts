@@ -24,15 +24,22 @@ export function normalizeKo(input: string): string {
   return squashRepeats(s);
 }
 
-// 자음/모음만으로 이뤄졌는지(완성형 → 자모 분해 후 검사)
-export function isOnlyConsonantsOrVowels(input: string): boolean {
-  const n = normalizeKo(input);
-  const jamo = Hangul.disassemble(n).filter((ch) => ch !== ' ');
-  console.log(jamo);
+/** 자모 검사 전용 정규화 (assemble 하지 않음) */
+function normalizeForJamoCheck(input: string): string[] {
+  let s = input.normalize('NFKC');
+  s = s.replace(/[50@]/g, (m) => LEET_MAP[m] ?? m);
+  s = s.replace(DROP_RE, '');
+  return Hangul.disassemble(s).filter((ch) => ch !== ' ');
+}
+
+/**
+ * 자모만으로 이루어졌는지 검사 (자음만, 모음만, 자음+모음 혼합 모두 포함)
+ * 전부가 [ㄱ-ㅎ] 또는 [ㅏ-ㅣ] 범위에 속하면 true
+ */
+export function isOnlyJamo(input: string): boolean {
+  const jamo = normalizeForJamoCheck(input);
   if (jamo.length === 0) return false;
-  const onlyConsonants = jamo.every((ch) => /[ㄱ-ㅎ]/.test(ch));
-  const onlyVowels = jamo.every((ch) => /[ㅏ-ㅣ]/.test(ch));
-  return onlyConsonants || onlyVowels;
+  return jamo.every((ch) => /^[ㄱ-ㅎㅏ-ㅣ]$/.test(ch));
 }
 
 export function toChoseong(input: string): string {
@@ -54,8 +61,8 @@ export type ProfanityLevel = 'none' | 'soft' | 'strict';
 export type ProfanityResult = { level: ProfanityLevel; matches?: string[] };
 
 export function checkProfanity(text: string): ProfanityResult {
-  // 1) 자음/모음만 → 무조건 strict
-  if (isOnlyConsonantsOrVowels(text)) {
+  // 1) 자모만(자/모 단독 + 혼합 포함) → 무조건 strict 차단
+  if (isOnlyJamo(text)) {
     return { level: 'strict', matches: ['ONLY_JAMO'] };
   }
 
