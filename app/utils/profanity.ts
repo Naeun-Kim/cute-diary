@@ -47,8 +47,16 @@ export function isOnlyConsonantsOrVowels(input: string): boolean {
   }
 
   // 모든 문자가 자음이거나 모음인지 확인
-  const onlyConsonants = jamo.every((ch) => /[ㄱ-ㅎ]/.test(ch));
-  const onlyVowels = jamo.every((ch) => /[ㅏ-ㅣ]/.test(ch));
+  const onlyConsonants = jamo.every((ch) => {
+    const isConsonant = /[ㄱ-ㅎ]/.test(ch);
+    console.log(`자음 체크: '${ch}' -> ${isConsonant}`);
+    return isConsonant;
+  });
+  const onlyVowels = jamo.every((ch) => {
+    const isVowel = /[ㅏ-ㅣ]/.test(ch);
+    console.log(`모음 체크: '${ch}' -> ${isVowel}`);
+    return isVowel;
+  });
 
   console.log('isOnlyConsonantsOrVowels - 자음만:', onlyConsonants);
   console.log('isOnlyConsonantsOrVowels - 모음만:', onlyVowels);
