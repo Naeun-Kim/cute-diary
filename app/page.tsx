@@ -13,6 +13,7 @@ import FloatingMemo from './components/FloatingMemo';
 import EventModal from './components/EventModal';
 import AuthBar from './components/AuthBar';
 import type { WalkEvent, KakaoMouseEvent } from './types/walk';
+import { checkProfanity } from './utils/profanity';
 
 // 같은 위치에 있는 이벤트들을 그룹핑하는 함수
 const groupEventsByLocation = (events: WalkEvent[]): WalkEvent[][] => {
@@ -109,6 +110,13 @@ export default function Home() {
   // 새 이벤트 저장
   const handleAddEvent = async (icon: WalkEvent['icon'], memo: string) => {
     if (!newEvent || !user) return;
+
+    const res = checkProfanity(memo);
+    if (res.level === 'strict' || res.level === 'soft') {
+      alert('자음/모음만 입력 또는 부적절한 표현이 포함되어 저장할 수 없어요.');
+      return;
+    }
+
     const newItem: WalkEvent = {
       id: Date.now().toString(),
       lat: newEvent.lat,
@@ -132,6 +140,13 @@ export default function Home() {
 
   const handleUpdateEvent = async (icon: WalkEvent['icon'], memo: string) => {
     if (!editingEvent || !user) return;
+
+    const res = checkProfanity(memo);
+    if (res.level === 'strict' || res.level === 'soft') {
+      alert('자음/모음만 입력 또는 부적절한 표현이 포함되어 저장할 수 없어요.');
+      return;
+    }
+
     setEvents((prev) =>
       prev.map((e) => (e.id === editingEvent.id ? { ...e, icon, memo } : e))
     );

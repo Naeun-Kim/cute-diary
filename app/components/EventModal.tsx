@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import * as styles from './EventModal.css';
 import type { IconType } from '../types/walk';
+import { checkProfanity, maskSoft } from '../utils/profanity';
 
 const icons: IconType[] = [
   '💩',
@@ -32,6 +33,13 @@ export default function EventModal({
   const [memo, setMemo] = useState(initialMemo);
 
   const handleSubmit = () => {
+    const res = checkProfanity(memo);
+
+    if (res.level === 'strict' || res.level === 'soft') {
+      alert('자음/모음만 입력 또는 부적절한 표현이 포함되어 저장할 수 없어요.');
+      return;
+    }
+
     if (memo.trim()) {
       onSubmit(selectedIcon, memo);
     }
