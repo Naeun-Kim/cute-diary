@@ -16,23 +16,43 @@ function squashRepeats(s: string) {
 }
 
 export function normalizeKo(input: string): string {
+  console.log('normalizeKo - 입력:', input);
   let s = input.normalize('NFKC');
+  console.log('normalizeKo - NFKC 후:', s);
   s = s.replace(/[50@]/g, (m) => LEET_MAP[m] ?? m);
+  console.log('normalizeKo - 숫자변환 후:', s);
   s = s.replace(DROP_RE, '');
+  console.log('normalizeKo - 특수문자 제거 후:', s);
   const jamo = Hangul.disassemble(s).filter((ch) => ch !== ' ');
+  console.log('normalizeKo - 자모분해:', jamo);
   s = Hangul.assemble(jamo);
-  return squashRepeats(s);
+  console.log('normalizeKo - 자모조합 후:', s);
+  const result = squashRepeats(s);
+  console.log('normalizeKo - 반복제거 후:', result);
+  return result;
 }
 
 // 자음/모음만으로 이뤄졌는지(완성형 → 자모 분해 후 검사)
 export function isOnlyConsonantsOrVowels(input: string): boolean {
   const n = normalizeKo(input);
   const jamo = Hangul.disassemble(n).filter((ch) => ch !== ' ');
-  if (jamo.length === 0) return false;
+
+  console.log('isOnlyConsonantsOrVowels - 원본:', input);
+  console.log('isOnlyConsonantsOrVowels - 정규화:', n);
+  console.log('isOnlyConsonantsOrVowels - 자모분해:', jamo);
+
+  if (jamo.length === 0) {
+    console.log('isOnlyConsonantsOrVowels - 자모 길이 0');
+    return false;
+  }
 
   // 모든 문자가 자음이거나 모음인지 확인
   const onlyConsonants = jamo.every((ch) => /[ㄱ-ㅎ]/.test(ch));
   const onlyVowels = jamo.every((ch) => /[ㅏ-ㅣ]/.test(ch));
+
+  console.log('isOnlyConsonantsOrVowels - 자음만:', onlyConsonants);
+  console.log('isOnlyConsonantsOrVowels - 모음만:', onlyVowels);
+  console.log('isOnlyConsonantsOrVowels - 결과:', onlyConsonants || onlyVowels);
 
   return onlyConsonants || onlyVowels;
 }
