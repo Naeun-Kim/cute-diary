@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import * as styles from './EventModal.css';
 import type { IconType } from '../types/walk';
-import { checkProfanity, maskSoft } from '../utils/profanity';
+import { checkProfanity } from '../utils/profanity';
 
 const icons: IconType[] = [
   '💩',
