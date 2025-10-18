@@ -33,14 +33,48 @@ export function normalizeKo(input: string): string {
   return squashRepeats(s);
 }
 
-/** ✅ 자음/모음만으로 이뤄졌는지 간단·정확 판별 (분해/조합 없이) */
+/** 자모 분류: 자음/모음/기타 */
+function jamoType(ch: string): 'C' | 'V' | null {
+  const c = ch.charCodeAt(0);
+
+  // 1) 호환 자모 (Compatibility Jamo)
+  if (c >= 0x3131 && c <= 0x314e) return 'C'; // ㄱ-ㅎ
+  if (c >= 0x314f && c <= 0x3163) return 'V'; // ㅏ-ㅣ
+
+  // 2) 기본 자모 블록 (Hangul Jamo)
+  if (c >= 0x1100 && c <= 0x1112) return 'C'; // choseong (ᄀ-ᄒ)
+  if (c >= 0x1161 && c <= 0x1175) return 'V'; // jungseong (ᅡ-ᅵ)
+  if (c >= 0x11a8 && c <= 0x11c2) return 'C'; // jongseong (ᆨ-ᇂ)
+
+  // 3) 확장-A (대부분 초성 확장 → 자음으로 취급)
+  if (c >= 0xa960 && c <= 0xa97f) return 'C';
+
+  // 4) 확장-B는 실사용이 드뭅니다. 필요하면 세분화해 추가하세요.
+  // if (c >= 0xD7B0 && c <= 0xD7FF) { ... }
+
+  return null; // 자모가 아님
+}
+
+/** ✅ 자음만 또는 모음만으로만 이뤄졌는지 판별 */
 export function isOnlyJamo(input: string): boolean {
   const s = safeNormalizeNFKC(input).replace(DROP_RE, '');
   if (!s) return false;
-  // 완성형 한글이 하나라도 있으면 '자모만' 아님
+
+  // 완성형 한글(가-힣)이 들어있으면 '자모만'은 아님
   if (/[가-힣]/.test(s)) return false;
-  // 남은 모든 문자가 자음/모음 범위인가?
-  return /^[ㄱ-ㅎㅏ-ㅣ]+$/.test(s);
+
+  let hasC = false;
+  let hasV = false;
+
+  for (const ch of s) {
+    const t = jamoType(ch);
+    if (t === 'C') hasC = true;
+    else if (t === 'V') hasV = true;
+    else return false; // 자모 이외 문자가 섞이면 자모-only가 아님
+  }
+
+  // 자음만 또는 모음만 → true (혼합이면 false)
+  return (hasC && !hasV) || (!hasC && hasV);
 }
 
 /** 초성 문자열 추출: '강아지' -> 'ㄱㅇㅈ' (disassemble 반환은 1차원 배열) */
