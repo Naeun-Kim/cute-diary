@@ -42,6 +42,9 @@ export function hasOnlyConsonantsOrVowels(input: string): boolean {
   const n = normalizeKo(input);
   const jamo = Hangul.disassemble(n).filter((ch) => ch !== ' ');
 
+  console.log('hasOnlyConsonantsOrVowels - 정규화된 텍스트:', n);
+  console.log('hasOnlyConsonantsOrVowels - 자모 분해:', jamo);
+
   // 연속된 자음/모음 그룹이 있는지 확인
   let currentGroup = '';
   for (let i = 0; i < jamo.length; i++) {
@@ -51,13 +54,16 @@ export function hasOnlyConsonantsOrVowels(input: string): boolean {
     } else {
       // 완성형 한글을 만나면 현재 그룹 검사
       if (currentGroup.length >= 3) {
+        console.log('현재 그룹 검사:', currentGroup);
         const onlyConsonants = currentGroup
           .split('')
           .every((c) => /[ㄱ-ㅎ]/.test(c));
         const onlyVowels = currentGroup
           .split('')
           .every((c) => /[ㅏ-ㅣ]/.test(c));
+        console.log('자음만:', onlyConsonants, '모음만:', onlyVowels);
         if (onlyConsonants || onlyVowels) {
+          console.log('자음/모음만 그룹 발견!');
           return true;
         }
       }
@@ -67,15 +73,19 @@ export function hasOnlyConsonantsOrVowels(input: string): boolean {
 
   // 마지막 그룹 검사
   if (currentGroup.length >= 3) {
+    console.log('마지막 그룹 검사:', currentGroup);
     const onlyConsonants = currentGroup
       .split('')
       .every((c) => /[ㄱ-ㅎ]/.test(c));
     const onlyVowels = currentGroup.split('').every((c) => /[ㅏ-ㅣ]/.test(c));
+    console.log('자음만:', onlyConsonants, '모음만:', onlyVowels);
     if (onlyConsonants || onlyVowels) {
+      console.log('자음/모음만 그룹 발견!');
       return true;
     }
   }
 
+  console.log('자음/모음만 그룹 없음');
   return false;
 }
 
@@ -98,33 +108,53 @@ export type ProfanityLevel = 'none' | 'soft' | 'strict';
 export type ProfanityResult = { level: ProfanityLevel; matches?: string[] };
 
 export function checkProfanity(text: string): ProfanityResult {
+  console.log('=== 비속어 검사 시작 ===');
+  console.log('원본 텍스트:', text);
+
   // 1) 자음/모음만 → 무조건 strict
   if (isOnlyConsonantsOrVowels(text)) {
+    console.log('자음/모음만 감지됨');
     return { level: 'strict', matches: ['ONLY_JAMO'] };
   }
 
   // 1-2) 혼합 텍스트에서 자음/모음만으로 이루어진 부분이 있는지 확인
   if (hasOnlyConsonantsOrVowels(text)) {
+    console.log('혼합 텍스트에서 자음/모음만 감지됨');
     return { level: 'strict', matches: ['MIXED_JAMO'] };
   }
 
   const n = normalizeKo(text);
+  console.log('정규화된 텍스트:', n);
 
   // 2) 원문 매칭
   const sHit = DENY_STRICT.find((re) => re.test(n));
-  if (sHit) return { level: 'strict', matches: [sHit.source] };
+  if (sHit) {
+    console.log('STRICT 비속어 감지:', sHit.source);
+    return { level: 'strict', matches: [sHit.source] };
+  }
 
   const wHit = DENY_SOFT.find((re) => re.test(n));
-  if (wHit) return { level: 'soft', matches: [wHit.source] };
+  if (wHit) {
+    console.log('SOFT 비속어 감지:', wHit.source);
+    return { level: 'soft', matches: [wHit.source] };
+  }
 
   // 3) 초성 축약 매칭
   const cho = toChoseong(n);
+  console.log('초성 변환:', cho);
   const csHit = CHOSEONG_STRICT.find((re) => re.test(cho));
-  if (csHit) return { level: 'strict', matches: [csHit.source] };
+  if (csHit) {
+    console.log('STRICT 초성 감지:', csHit.source);
+    return { level: 'strict', matches: [csHit.source] };
+  }
 
   const cwHit = CHOSEONG_SOFT.find((re) => re.test(cho));
-  if (cwHit) return { level: 'soft', matches: [cwHit.source] };
+  if (cwHit) {
+    console.log('SOFT 초성 감지:', cwHit.source);
+    return { level: 'soft', matches: [cwHit.source] };
+  }
 
+  console.log('비속어 없음');
   return { level: 'none' };
 }
 
