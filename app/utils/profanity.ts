@@ -9,7 +9,8 @@ const CHOSEONG_STRICT: RegExp[] = [/ㅅㅂ/, /ㅂㅅ/, /ㄲㅈ/];
 const CHOSEONG_SOFT: RegExp[] = [/ㅈ같/];
 
 const LEET_MAP: Record<string, string> = { '5': '오', '0': 'o', '@': 'a' };
-const DROP_RE = /[\s\-_.~!?:*+#/\\()\[\]{}<>|']/g;
+// 공백/기호 제거
+const DROP_RE = /[\s\-_.~!?:*+#/\\()\[\]{}<>|',"]/g;
 
 function squashRepeats(s: string) {
   return s.replace(/([ㅋㅎ])\1{2,}/g, '$1$1').replace(/([!?.])\1{2,}/g, '$1');
@@ -19,40 +20,36 @@ export function normalizeKo(input: string): string {
   let s = input.normalize('NFKC');
   s = s.replace(/[50@]/g, (m) => LEET_MAP[m] ?? m);
   s = s.replace(DROP_RE, '');
+  // 자모 우회 입력을 한 번 붙여주되(예: ㅅ ㅣ -> 시) 정상 문장을 위한 과정
   const jamo = Hangul.disassemble(s).filter((ch) => ch !== ' ');
   s = Hangul.assemble(jamo);
   return squashRepeats(s);
 }
 
-/** 자모 검사 전용 정규화 (assemble 하지 않음) */
-function normalizeForJamoCheck(input: string): string[] {
-  let s = input.normalize('NFKC');
-  s = s.replace(/[50@]/g, (m) => LEET_MAP[m] ?? m);
-  s = s.replace(DROP_RE, '');
-  return Hangul.disassemble(s).filter((ch) => ch !== ' ');
-}
-
-/**
- * 자모만으로 이루어졌는지 검사 (자음만, 모음만, 자음+모음 혼합 모두 포함)
- * 전부가 [ㄱ-ㅎ] 또는 [ㅏ-ㅣ] 범위에 속하면 true
- */
+/** ⛳ 자음/모음만인지 간단/정확하게 판별 (재조합 X) */
 export function isOnlyJamo(input: string): boolean {
-  const jamo = normalizeForJamoCheck(input);
-  if (jamo.length === 0) return false;
-  return jamo.every((ch) => /^[ㄱ-ㅎㅏ-ㅣ]$/.test(ch));
+  let s = input.normalize('NFKC').replace(DROP_RE, '');
+  if (!s) return false;
+  // 완성형 한글(가-힣)이 하나라도 있으면 "자모만"은 아님
+  if (/[가-힣]/.test(s)) return false;
+  // 남은 문자가 전부 자음(ㄱ-ㅎ) 또는 모음(ㅏ-ㅣ)인가?
+  return /^[ㄱ-ㅎㅏ-ㅣ]+$/.test(s);
 }
 
+/** 초성 문자열만 추출: '강아지' -> 'ㄱㅇㅈ' */
 export function toChoseong(input: string): string {
-  const chars = Array.from(input);
   const res: string[] = [];
-  for (const ch of chars) {
+  for (const ch of Array.from(input)) {
     if (/[가-힣]/.test(ch)) {
-      const jamo = Hangul.disassemble(ch, true) as string[][];
-      const cho = jamo[0]?.[0] ?? ch;
-      res.push(cho);
+      // disassemble은 1차원 배열 반환: [초성, 중성, 종성?]
+      const parts = Hangul.disassemble(ch);
+      const cho = parts[0]; // 초성
+      if (cho) res.push(cho);
     } else if (/^[ㄱ-ㅎ]$/.test(ch)) {
+      // 자음 단독 입력은 그대로 초성 취급
       res.push(ch);
     }
+    // 그 외 문자는 초성 없음 → 무시
   }
   return res.join('');
 }
@@ -61,7 +58,7 @@ export type ProfanityLevel = 'none' | 'soft' | 'strict';
 export type ProfanityResult = { level: ProfanityLevel; matches?: string[] };
 
 export function checkProfanity(text: string): ProfanityResult {
-  // 1) 자모만(자/모 단독 + 혼합 포함) → 무조건 strict 차단
+  // 1) 자모만(자음/모음만 또는 혼합) → 즉시 차단
   if (isOnlyJamo(text)) {
     return { level: 'strict', matches: ['ONLY_JAMO'] };
   }
@@ -71,22 +68,15 @@ export function checkProfanity(text: string): ProfanityResult {
   // 2) 원문 매칭
   const sHit = DENY_STRICT.find((re) => re.test(n));
   if (sHit) return { level: 'strict', matches: [sHit.source] };
-
   const wHit = DENY_SOFT.find((re) => re.test(n));
   if (wHit) return { level: 'soft', matches: [wHit.source] };
 
-  // 3) 초성 축약 매칭
+  // 3) 초성 축약 매칭 (예: ㅅㅂ)
   const cho = toChoseong(n);
   const csHit = CHOSEONG_STRICT.find((re) => re.test(cho));
   if (csHit) return { level: 'strict', matches: [csHit.source] };
-
   const cwHit = CHOSEONG_SOFT.find((re) => re.test(cho));
   if (cwHit) return { level: 'soft', matches: [cwHit.source] };
 
   return { level: 'none' };
-}
-
-// (선택) soft 레벨 마스킹: 실제론 부분 마스킹 권장
-export function maskSoft(text: string): string {
-  return text.replace(/([가-힣A-Za-z0-9])/g, '•');
 }
