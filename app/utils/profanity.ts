@@ -28,6 +28,7 @@ export function normalizeKo(input: string): string {
 export function isOnlyConsonantsOrVowels(input: string): boolean {
   const n = normalizeKo(input);
   const jamo = Hangul.disassemble(n).filter((ch) => ch !== ' ');
+  console.log(jamo);
   if (jamo.length === 0) return false;
   const onlyConsonants = jamo.every((ch) => /[ㄱ-ㅎ]/.test(ch));
   const onlyVowels = jamo.every((ch) => /[ㅏ-ㅣ]/.test(ch));
