@@ -39,8 +39,9 @@ export function toChoseong(input: string): string {
   const res: string[] = [];
   for (const ch of chars) {
     if (/[가-힣]/.test(ch)) {
-      const [cho] = Hangul.disassemble(ch, true) as string[]; // 초/중/종
-      res.push(cho ?? ch);
+      const jamo = Hangul.disassemble(ch, true) as string[][];
+      const cho = jamo[0]?.[0] ?? ch;
+      res.push(cho);
     } else if (/^[ㄱ-ㅎ]$/.test(ch)) {
       res.push(ch);
     }
