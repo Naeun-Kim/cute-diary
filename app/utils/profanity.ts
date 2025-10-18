@@ -29,9 +29,54 @@ export function isOnlyConsonantsOrVowels(input: string): boolean {
   const n = normalizeKo(input);
   const jamo = Hangul.disassemble(n).filter((ch) => ch !== ' ');
   if (jamo.length === 0) return false;
+
+  // 모든 문자가 자음이거나 모음인지 확인
   const onlyConsonants = jamo.every((ch) => /[ㄱ-ㅎ]/.test(ch));
   const onlyVowels = jamo.every((ch) => /[ㅏ-ㅣ]/.test(ch));
+
   return onlyConsonants || onlyVowels;
+}
+
+// 자음/모음만으로 이루어진 부분이 있는지 확인 (혼합 텍스트용)
+export function hasOnlyConsonantsOrVowels(input: string): boolean {
+  const n = normalizeKo(input);
+  const jamo = Hangul.disassemble(n).filter((ch) => ch !== ' ');
+
+  // 연속된 자음/모음 그룹이 있는지 확인
+  let currentGroup = '';
+  for (let i = 0; i < jamo.length; i++) {
+    const ch = jamo[i];
+    if (/[ㄱ-ㅎㅏ-ㅣ]/.test(ch)) {
+      currentGroup += ch;
+    } else {
+      // 완성형 한글을 만나면 현재 그룹 검사
+      if (currentGroup.length >= 3) {
+        const onlyConsonants = currentGroup
+          .split('')
+          .every((c) => /[ㄱ-ㅎ]/.test(c));
+        const onlyVowels = currentGroup
+          .split('')
+          .every((c) => /[ㅏ-ㅣ]/.test(c));
+        if (onlyConsonants || onlyVowels) {
+          return true;
+        }
+      }
+      currentGroup = '';
+    }
+  }
+
+  // 마지막 그룹 검사
+  if (currentGroup.length >= 3) {
+    const onlyConsonants = currentGroup
+      .split('')
+      .every((c) => /[ㄱ-ㅎ]/.test(c));
+    const onlyVowels = currentGroup.split('').every((c) => /[ㅏ-ㅣ]/.test(c));
+    if (onlyConsonants || onlyVowels) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function toChoseong(input: string): string {
@@ -56,6 +101,11 @@ export function checkProfanity(text: string): ProfanityResult {
   // 1) 자음/모음만 → 무조건 strict
   if (isOnlyConsonantsOrVowels(text)) {
     return { level: 'strict', matches: ['ONLY_JAMO'] };
+  }
+
+  // 1-2) 혼합 텍스트에서 자음/모음만으로 이루어진 부분이 있는지 확인
+  if (hasOnlyConsonantsOrVowels(text)) {
+    return { level: 'strict', matches: ['MIXED_JAMO'] };
   }
 
   const n = normalizeKo(text);
