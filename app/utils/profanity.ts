@@ -28,7 +28,7 @@ export function normalizeKo(input: string): string {
 
 /** ⛳ 자음/모음만인지 간단/정확하게 판별 (재조합 X) */
 export function isOnlyJamo(input: string): boolean {
-  let s = input.normalize('NFKC').replace(DROP_RE, '');
+  const s = input.normalize('NFKC').replace(DROP_RE, '');
   if (!s) return false;
   // 완성형 한글(가-힣)이 하나라도 있으면 "자모만"은 아님
   if (/[가-힣]/.test(s)) return false;
