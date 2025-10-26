@@ -112,7 +112,7 @@ export default function Home() {
     if (!newEvent || !user) return;
 
     const res = checkProfanity(memo);
-    if (res.level === 'strict' || res.level === 'soft') {
+    if (res.level === 'strict') {
       alert('자음/모음만 입력 또는 부적절한 표현이 포함되어 저장할 수 없어요.');
       return;
     }
@@ -142,7 +142,7 @@ export default function Home() {
     if (!editingEvent || !user) return;
 
     const res = checkProfanity(memo);
-    if (res.level === 'strict' || res.level === 'soft') {
+    if (res.level === 'strict') {
       alert('자음/모음만 입력 또는 부적절한 표현이 포함되어 저장할 수 없어요.');
       return;
     }
