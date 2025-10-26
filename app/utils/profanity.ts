@@ -79,31 +79,6 @@ export function isOnlyJamo(input: string): boolean {
   return (hasC && !hasV) || (!hasC && hasV);
 }
 
-// ✅ 자모 연속 구간 감지: 문장 중에 'ㄴㄹㅇ'·'ㅎㄷ' 같은 덩어리가 있으면 true
-function containsJamoRun(input: string, minRun = 2): boolean {
-  // 완성형 한글만 입력된 경우 (예: "봉", "강아지") 제외
-  if (/^[가-힣]+$/.test(input)) return false;
-
-  // 공백/개행은 유지해서 '단어 경계' 역할을 하게 하고, 나머지 기호는 제거
-  const s = safeNormalizeNFKC(input).replace(
-    /[^\S\r\n]|[\-_.~!?:*+#/\\()\[\]{}<>|'",]/g,
-    (m) => (/\s/.test(m) ? m : '') // 공백류는 남기고, 기호는 제거
-  );
-
-  let run = 0;
-  for (const ch of s) {
-    const t = jamoType(ch);
-    if (t === 'C' || t === 'V') {
-      run += 1;
-      if (run >= minRun) return true;
-    } else {
-      // 자모 연속 끊김 (완성형 한글/숫자/영문/공백 등)
-      run = 0;
-    }
-  }
-  return false;
-}
-
 /** 초성 문자열 추출: '강아지' -> 'ㄱㅇㅈ' (disassemble 반환은 1차원 배열) */
 export function toChoseong(input: string): string {
   const res: string[] = [];
@@ -128,11 +103,6 @@ export function checkProfanity(text: string): ProfanityResult {
   // 1) 문장 전체가 자모만 → 차단
   if (isOnlyJamo(text)) {
     return { level: 'strict', matches: ['ONLY_JAMO'] };
-  }
-
-  // 1-추가) 문장 속 자모 연속 구간(최소 2자) 포함 → 차단
-  if (containsJamoRun(text, 2)) {
-    return { level: 'strict', matches: ['JAMO_RUN'] };
   }
 
   const n = normalizeKo(text);
