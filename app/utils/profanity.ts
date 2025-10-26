@@ -1,7 +1,9 @@
 // app/utils/profanity.ts
 import * as Hangul from 'hangul-js';
 
-const DENY_STRICT: RegExp[] = [/씨발|시발|좆|병신|븅신|개새끼|개색기/i];
+const DENY_STRICT: RegExp[] = [
+  /씨발|시발|좆|병신|븅신|개새끼|개색기|조카튼|엿|망하|망해|망했/i,
+];
 const DENY_SOFT: RegExp[] = [/ㅈ같|꺼져|닥쳐|미친|엿먹|개같|똥개/i];
 
 // 초성(자음만) 축약 우회 대응
@@ -79,6 +81,9 @@ export function isOnlyJamo(input: string): boolean {
 
 // ✅ 자모 연속 구간 감지: 문장 중에 'ㄴㄹㅇ'·'ㅎㄷ' 같은 덩어리가 있으면 true
 function containsJamoRun(input: string, minRun = 2): boolean {
+  // 완성형 한글만 입력된 경우 (예: "봉", "강아지") 제외
+  if (/^[가-힣]+$/.test(input)) return false;
+
   // 공백/개행은 유지해서 '단어 경계' 역할을 하게 하고, 나머지 기호는 제거
   const s = safeNormalizeNFKC(input).replace(
     /[^\S\r\n]|[\-_.~!?:*+#/\\()\[\]{}<>|'",]/g,
